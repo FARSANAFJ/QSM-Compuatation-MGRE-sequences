@@ -1,0 +1,34 @@
+''' Relaxation Rate(R2star) and proton density estimation in MGRE sequences
+ S(TE)=rho*exp(-R2star*TE) signal eqaution of magnitude component of complex Field.
+ where S(TE) magnitude at echo time TE, rho is the proton density. the signal is exponentially decaying and 
+ the decay rate is measured by the bestfit btwn pixel intensity and echotime point 
+ using the 'polyfit' function in numpy '''
+
+ #---initialize a slice with five echoes
+ # a_temp=number of rows
+ #b_temp=number of coloumns
+ #NEchoes=number of echoes in each slice
+ # this program is for a single slice 
+# define an empty arry to strore the five echoes of a particular slice
+Z=np.empty((a_temp,b_temp,NEchoes)) 
+#rsz is the real part of the data please go through DICOM_READ_GE to get the details regardig stacking the slices
+#all the five echoes of n-th slice is stored a variable Z.
+Z[:,:,0]=rsz_E1[:,:,n]
+Z[:,:,1]=rsz_E2[:,:,n]
+Z[:,:,2]=rsz_E3[:,:,n]
+Z[:,:,3]=rsz_E4[:,:,n]
+Z[:,:,4]=rsz_E5[:,:,n]
+### reshape and vectorize Z 
+K=a_temp*b_temp
+Z=abs(Z);
+Z_rshp=np.reshape(Z,(K,5))
+#make an arry of echo-times
+X=np.arange(start=0.005,stop=0.025,step=0.005)
+R2star=np.empty((1,K))
+T2star=np.empty((1,K))
+# fiting process pixelwise
+for i in range(K):
+  Ylog=np.log(Z[i,:])
+  poly=np.polyfit(X,Ylog,1)
+  R2star=poly[1]
+  Rho=poly[2]
